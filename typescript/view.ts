@@ -62,9 +62,9 @@ export class CardBoardView extends ItemView {
   async onOpen() {
     this.icon       = "card-board"
 
-    const globalSettings : any = this.plugin.settings?.data.globalSettings;
+    const globalSettings : any = this.plugin.settings?.data?.globalSettings;
 
-    if ((!(globalSettings === undefined)) && globalSettings.hasOwnProperty('filters')) {
+    if (Array.isArray(globalSettings?.filters)) {
       this.fileFilter = new FileFilter(globalSettings.filters);
     } else {
       this.fileFilter = new FileFilter([]);

@@ -48,6 +48,7 @@ export default class CardBoardPlugin extends Plugin {
   }
 
   async onLayoutReady() {
+    if (this.disposed || this.layoutReady) return;
     this.layoutReady = true;
     this.registerEvent(this.app.vault.on('create', file => this.handleFileCreated(file)));
     this.registerEvent(this.app.vault.on('delete', file => this.handleFileDeleted(file)));
@@ -131,7 +132,7 @@ export default class CardBoardPlugin extends Plugin {
         if (this.app.vault.getAbstractFileByPath(path) === file) this.dirty.add(path);
       }
       if (queued >= 32 || performance.now() - sliceStart >= 8) {
-        await this.worker.flush();
+        if (queued > 0) await this.worker.flush();
         await new Promise(resolve => setTimeout(resolve, 0));
         sliceStart = performance.now(); queued = 0;
       }
@@ -185,7 +186,7 @@ export default class CardBoardPlugin extends Plugin {
         }
         if (++count % 32 === 0) { await this.worker.flush(); await new Promise(resolve => setTimeout(resolve, 0)); }
       }
-      if (!this.disposed) await this.worker.flush();
+      if (count > 0 && !this.disposed) await this.worker.flush();
     })().finally(() => { this.flushing = null; });
     return this.flushing;
   }
@@ -345,6 +346,7 @@ export default class CardBoardPlugin extends Plugin {
   }
 
   async saveSettings( newSettings: CardBoardPluginSettingsPostV11) {
+    if (JSON.stringify(this.settings) === JSON.stringify(newSettings)) return;
     await this.backupOldVersion(this.settings?.version, newSettings.version);
 
     const previousBoards = JSON.stringify(this.settings?.data?.boardConfigs?.map(config => (config as any).name || (config as any).data?.title));

@@ -39,11 +39,12 @@ w.createBackgroundParser = (source: string, flags: any) => new ParserWorker(sour
 
 w.runProductionSmoke = async (source: string) => {
   const settings: any = { version: '0.13.0', data: { globalSettings: { filters: [] }, boardConfigs: [] } };
-  class Plugin {
-    app: any;
+  // Keep the host class native even if the plugin compiler target regresses.
+  const Plugin = new Function('settings', `return class Plugin {
     async loadData() { return settings; }
-    registerView() {} registerEvent() {} addRibbonIcon() {} addCommand(command: any) { return command; }
-  }
+    registerView() {} registerEvent() {} addRibbonIcon() {}
+    addCommand(command) { return command; }
+  }`)(settings);
   const api: any = { ...obsidian, Plugin, ItemView: class {}, MarkdownView: class {}, addIcon() {} };
   const module = { exports: {} as any };
   new Function('module','exports','require',source)(module,module.exports,(name: string) => {
