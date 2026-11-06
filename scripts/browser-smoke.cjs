@@ -42,12 +42,18 @@ const assert = require('assert/strict');
     const color = await page.locator('.card-board-card[data-assignee=Alex] svg polygon').first().evaluate(el=>getComputedStyle(el).fill);
     assert.equal(color,'rgb(195, 220, 250)');
     await page.evaluate(()=>{
+      document.documentElement.style.setProperty('--text-normal','#e2e6ed');
+      document.documentElement.style.setProperty('--background-primary','#202124');
       const changed=structuredClone(testSettings); changed.data.globalSettings.people[0].color='#112233';
       testApp.ports.interopToElm.send({tag:'settingsUpdated',data:changed});
     });
     await page.waitForFunction(()=>[...document.querySelectorAll('.card-board-card[data-assignee=Alex] .card-board-card-title')]
-      .every(el=>getComputedStyle(el).color==='rgb(255, 255, 255)'));
-    await page.evaluate(()=>testApp.ports.interopToElm.send({tag:'settingsUpdated',data:testSettings}));
+      .every(el=>getComputedStyle(el).color==='rgb(226, 230, 237)'));
+    await page.evaluate(()=>{
+      document.documentElement.style.removeProperty('--text-normal');
+      document.documentElement.style.removeProperty('--background-primary');
+      testApp.ports.interopToElm.send({tag:'settingsUpdated',data:testSettings});
+    });
     const border = await page.locator('.card-board-card').filter({hasText:'Urgent long'}).locator('.card-board-card-highlight-area').getAttribute('class');
     assert.match(border,/important/);
     assert.equal(await page.locator('.card-board-card').filter({hasText:'Urgent long'}).locator('.card-board-card-highlight-area').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(219, 150, 0)');
@@ -66,13 +72,15 @@ const assert = require('assert/strict');
     await urgentCard.getByRole('button',{name:'Edit estimate and urgency'}).click();
     await page.waitForFunction(()=>outbound.some(message=>message.tag==='editPlanning'));
     const drag = async (card, destination, touch = false) => {
-      const from = await card.locator('[data-card-drag-handle]').boundingBox();
+      const from = await card.boundingBox();
       const to = await destination.boundingBox();
-      const start = { x: from.x + from.width/2, y: from.y + from.height/2 };
+      const start = { x: from.x + (touch ? from.width/2 : 2), y: from.y + from.height/2 };
       const end = { x: to.x + to.width/2, y: to.y + 8 };
       if (touch) {
         const cdp = await page.context().newCDPSession(page);
         await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[start]});
+        await page.clock.runFor(500);
+        await expect(card).toHaveClass(/card-board-pointer-dragging/);
         for(let step=1;step<=12;step++) await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:start.x+(end.x-start.x)*step/12,y:start.y+(end.y-start.y)*step/12}]});
         await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
         await cdp.detach();

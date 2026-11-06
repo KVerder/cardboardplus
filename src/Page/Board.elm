@@ -1140,18 +1140,10 @@ cardView today card =
             []
         , Html.div
             [ class "card-board-card-content-area"
-            , style "color"
-                (if List.length (TaskItem.assignees taskItem) == 1 then
-                    TaskItem.assignee taskItem |> Maybe.map (\name -> "var(" ++ Person.colorKey name ++ "-foreground, #17212b)") |> Maybe.withDefault "inherit"
-
-                 else
-                    "#111111"
-                )
             , attribute "data-assignee-count" (String.fromInt (List.length (TaskItem.assignees taskItem)))
             ]
             (Person.background (TaskItem.assignees taskItem)
-                :: [ Html.button [ class "card-board-drag-handle", attribute "data-card-drag-handle" "true", attribute "aria-label" "Drag to reorder or move card", attribute "title" "Drag to reorder or move card" ] [ Html.text "⠿" ]
-                   , Html.input
+                :: [ Html.input
                         [ type_ "checkbox"
                         , class "task-list-item-checkbox"
                         , onClick <| TaskItemToggled taskItemId

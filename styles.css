@@ -275,7 +275,7 @@ ul.card-board-column-list > li.card-board-card::before {
   margin: 0 0.2em;
   font-weight: var(--bold-weight);
   display: -webkit-box;
-  color: var(--text-title-h1);
+  color: var(--text-normal);
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -853,10 +853,10 @@ button.card-board-card-action-area-button {
 .card-board-urgent { font-weight: bold; }
 
 /* Exact corner-to-corner person regions, independent of card aspect ratio. */
-.card-board-card-content-area { position: relative; isolation: isolate; }
-.card-board-assignee-background { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; border-radius: inherit; }
-.card-board-card-content-area[data-assignee-count]:not([data-assignee-count="0"]) { background: transparent; color: #111; }
-.card-board-card-content-area[data-assignee-count]:not([data-assignee-count="0"]):not([data-assignee-count="1"]) > :not(svg) { background-color: rgba(255,255,255,.84); border-radius: 3px; }
+.card-board-card-content-area { position: relative; isolation: isolate; color: var(--text-normal); }
+.card-board-assignee-background { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; opacity: .18; pointer-events: none; border-radius: inherit; }
+.card-board-card-content-area[data-assignee-count]:not([data-assignee-count="0"]) { background-color: var(--background-primary); }
+
 .card-board-assignees { display: flex; flex-wrap: wrap; gap: 4px; width: fit-content; }
 
 .card-board-activity { padding: 20px; overflow: auto; max-height: calc(100vh - 160px); }
@@ -874,7 +874,8 @@ button.card-board-card-action-area-button {
 .card-board-activity-cell.level-4 { background: #216e39; }
 .card-board-activity-cell:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 1px; }
 
-.card-board-drag-handle { touch-action: none; cursor: grab; padding: 2px 7px; float: right; user-select: none; min-width: 30px; min-height: 30px; }
+.card-board-card { -webkit-touch-callout: none; }
+.card-board-card-highlight-area { cursor: grab; }
 .card-board-pointer-dragging { opacity: .4; }
 .card-board-drop-target > .card-board-column { outline: 2px dashed var(--interactive-accent); outline-offset: -2px; }
 .card-board-drop-before { box-shadow: 0 -4px 0 var(--interactive-accent); }
